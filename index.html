@@ -1,92 +1,129 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GN Systems</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-<style>
-body{margin:0;font-family:Arial;background:#0f172a;color:white}
-#login{height:100vh;display:flex;align-items:center;justify-content:center}
-.box{background:#1e293b;padding:30px;border-radius:12px;width:300px}
-input{width:100%;padding:10px;margin:8px 0;border-radius:8px;border:none}
-button{width:100%;padding:12px;background:#2563eb;color:white;border:none;border-radius:8px}
-#app{display:none;padding:20px;background:#f8fafc;color:black}
-.card{background:white;padding:20px;border-radius:10px;margin-bottom:10px}
-</style>
+    html, body {
+      width: 100%;
+      height: 100%;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #020617, #0f172a, #1e293b);
+      overflow: hidden;
+    }
+
+    .topbar {
+      height: 58px;
+      background: linear-gradient(90deg, #0f172a, #1e293b);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .brand {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .status {
+      font-size: 13px;
+      color: #93c5fd;
+    }
+
+    .frame-wrap {
+      width: 100%;
+      height: calc(100vh - 58px);
+      background: #0b1120;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: white;
+    }
+
+    .loading {
+      position: fixed;
+      top: 58px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, #020617, #0f172a, #1e293b);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      color: white;
+      z-index: 9999;
+      transition: opacity 0.35s ease, visibility 0.35s ease;
+    }
+
+    .loading.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .logo {
+      font-size: 42px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      margin-bottom: 10px;
+    }
+
+    .sub {
+      color: #93c5fd;
+      font-size: 15px;
+    }
+  </style>
 </head>
-
 <body>
 
-<div id="login">
-  <div class="box">
-    <h2>GN SYSTEMS</h2>
-    <input id="user" placeholder="Usuário">
-    <input id="pass" type="password" placeholder="Senha">
-    <button onclick="login()">Entrar</button>
+  <div class="topbar">
+    <div class="brand">GN SYSTEMS</div>
+    <div class="status" id="statusText">Carregando sistema...</div>
   </div>
-</div>
 
-<div id="app">
-  <h2>Dashboard</h2>
-  <div id="dados"></div>
-</div>
+  <div class="frame-wrap">
+    <iframe
+      id="appFrame"
+      src="https://script.google.com/macros/s/AKfycbwGfCWxFeqpim3Rx5UgEWZ5HvP6Hg-eP6oC05WyvvW1Vp2qhkKnQ1vz8K2N7kDT6ge5/exec"
+      allow="camera; microphone"
+      referrerpolicy="strict-origin-when-cross-origin">
+    </iframe>
+  </div>
 
-<script>
+  <div class="loading" id="loading">
+    <div class="logo">GN SYSTEMS</div>
+    <div class="sub">Carregando plataforma...</div>
+  </div>
 
-const API_URL = "https://script.google.com/macros/s/AKfycbwGfCWxFeqpim3Rx5UgEWZ5HvP6Hg-eP6oC05WyvvW1Vp2qhkKnQ1vz8K2N7kDT6ge5/exec";
+  <script>
+    const frame = document.getElementById("appFrame");
+    const loading = document.getElementById("loading");
+    const statusText = document.getElementById("statusText");
 
-let sistema = {};
-
-function login(){
-  const user = document.getElementById("user").value;
-  const pass = document.getElementById("pass").value;
-
-  fetch(API_URL,{
-    method:"POST",
-    body:JSON.stringify({
-      action:"login",
-      usuario:user,
-      senha:pass
-    })
-  })
-  .then(r=>r.json())
-  .then(res=>{
-    if(res.ok){
-      document.getElementById("login").style.display="none";
-      document.getElementById("app").style.display="block";
-      carregar();
-    }else{
-      alert("Login inválido");
+    function finalizarCarregamento() {
+      loading.classList.add("hidden");
+      statusText.textContent = "Sistema online";
     }
-  });
-}
 
-function carregar(){
-  fetch(API_URL,{
-    method:"POST",
-    body:JSON.stringify({
-      action:"getData"
-    })
-  })
-  .then(r=>r.json())
-  .then(res=>{
-    sistema = res;
-    render();
-  });
-}
+    frame.addEventListener("load", finalizarCarregamento);
 
-function render(){
-  let html = "";
-
-  html += `<div class="card">Equipamentos: ${sistema.dashboard.equipamentos}</div>`;
-  html += `<div class="card">Próximas: ${sistema.dashboard.proximas}</div>`;
-  html += `<div class="card">Concluídas: ${sistema.dashboard.concluidas}</div>`;
-  html += `<div class="card">Reagendadas: ${sistema.dashboard.reagendadas}</div>`;
-  html += `<div class="card">Atrasadas: ${sistema.dashboard.atrasadas}</div>`;
-
-  document.getElementById("dados").innerHTML = html;
-}
-
-</script>
+    setTimeout(finalizarCarregamento, 4000);
+  </script>
 
 </body>
 </html>
