@@ -1,41 +1,92 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GN Systems</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #020617, #0f172a, #1e293b);
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      flex-direction: column;
-      text-align: center;
-      padding: 20px;
-    }
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-    h1 {
-      font-size: 42px;
-      margin-bottom: 10px;
-    }
-
-    p {
-      color: #93c5fd;
-      font-size: 16px;
-    }
-  </style>
+<style>
+body{margin:0;font-family:Arial;background:#0f172a;color:white}
+#login{height:100vh;display:flex;align-items:center;justify-content:center}
+.box{background:#1e293b;padding:30px;border-radius:12px;width:300px}
+input{width:100%;padding:10px;margin:8px 0;border-radius:8px;border:none}
+button{width:100%;padding:12px;background:#2563eb;color:white;border:none;border-radius:8px}
+#app{display:none;padding:20px;background:#f8fafc;color:black}
+.card{background:white;padding:20px;border-radius:10px;margin-bottom:10px}
+</style>
 </head>
-<body>
-  <h1>GN SYSTEMS</h1>
-  <p>Carregando sistema...</p>
 
-  <script>
-    window.location.href = https://script.google.com/macros/s/AKfycbz93reF2lcYiqxG4cj1leG9UlZFg6pYNmSL53iVkgzMIJxWaf62efZPpkQMO0URB9MF/exec";
-  </script>
+<body>
+
+<div id="login">
+  <div class="box">
+    <h2>GN SYSTEMS</h2>
+    <input id="user" placeholder="Usuário">
+    <input id="pass" type="password" placeholder="Senha">
+    <button onclick="login()">Entrar</button>
+  </div>
+</div>
+
+<div id="app">
+  <h2>Dashboard</h2>
+  <div id="dados"></div>
+</div>
+
+<script>
+
+const API_URL = "https://script.google.com/macros/s/AKfycbwGfCWxFeqpim3Rx5UgEWZ5HvP6Hg-eP6oC05WyvvW1Vp2qhkKnQ1vz8K2N7kDT6ge5/exec";
+
+let sistema = {};
+
+function login(){
+  const user = document.getElementById("user").value;
+  const pass = document.getElementById("pass").value;
+
+  fetch(API_URL,{
+    method:"POST",
+    body:JSON.stringify({
+      action:"login",
+      usuario:user,
+      senha:pass
+    })
+  })
+  .then(r=>r.json())
+  .then(res=>{
+    if(res.ok){
+      document.getElementById("login").style.display="none";
+      document.getElementById("app").style.display="block";
+      carregar();
+    }else{
+      alert("Login inválido");
+    }
+  });
+}
+
+function carregar(){
+  fetch(API_URL,{
+    method:"POST",
+    body:JSON.stringify({
+      action:"getData"
+    })
+  })
+  .then(r=>r.json())
+  .then(res=>{
+    sistema = res;
+    render();
+  });
+}
+
+function render(){
+  let html = "";
+
+  html += `<div class="card">Equipamentos: ${sistema.dashboard.equipamentos}</div>`;
+  html += `<div class="card">Próximas: ${sistema.dashboard.proximas}</div>`;
+  html += `<div class="card">Concluídas: ${sistema.dashboard.concluidas}</div>`;
+  html += `<div class="card">Reagendadas: ${sistema.dashboard.reagendadas}</div>`;
+  html += `<div class="card">Atrasadas: ${sistema.dashboard.atrasadas}</div>`;
+
+  document.getElementById("dados").innerHTML = html;
+}
+
+</script>
+
 </body>
 </html>
